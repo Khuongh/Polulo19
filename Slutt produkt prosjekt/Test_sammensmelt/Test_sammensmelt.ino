@@ -49,6 +49,7 @@ void setup() {
   linesensor.initFiveSensors();
   //Sends you to the start of the mnu
   updateMenu();
+  EEPROM.write(0, 0);
 }
 
 void loop() {
@@ -711,16 +712,7 @@ void action30(){
 void action31(){
   lcd.clear();
     //Max balance is 255 and will let you know if its full
-    if ( (account_balance + money_deposit) >= 255){
-      account_balance = 255;
-      EEPROM.write(0, account_balance);
-      lcd.clear();
-      lcd.print("Account");
-      lcd.gotoXY(0,1);
-      lcd.print("is full!");
-      delay(2000); 
-    }
-    else {
+    if ( (account_balance + money_deposit) <= 255){
       account_balance += money_deposit;
       EEPROM.write(0, account_balance);
       lcd.clear();
@@ -729,6 +721,15 @@ void action31(){
       lcd.gotoXY(0,1);
       lcd.print(EEPROM.read(0));
       delay(1000);
+  }
+    else {
+      account_balance = 255;
+      EEPROM.write(0, account_balance);
+      lcd.clear();
+      lcd.print("Account");
+      lcd.gotoXY(0,1);
+      lcd.print("is full!");
+      delay(2000);
   }
 }
 //Function for sending you back to main menu
