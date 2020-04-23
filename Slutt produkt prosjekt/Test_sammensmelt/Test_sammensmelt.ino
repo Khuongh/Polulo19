@@ -280,7 +280,7 @@ void action10(){
     turnSensorReset();
     motors.setSpeeds(150, -150);// turning the car 180 degrees
     angle = getAngle();
-    while ( angle <= 180 ){
+    while ( angle <= -180 ){
       angle = getAngle();
     }
     motors.setSpeeds(0, 0); //stops car for 100 ms
@@ -690,23 +690,25 @@ void action30(){
 //Function for filling up your Account Balance
 void action31(){
   lcd.clear();
-  if ( account_balance <= 250){
-    account_balance += money_deposit;
-   EEPROM.write(0, account_balance);
-  lcd.clear();
-  lcd.gotoXY(0,0);
-  lcd.print("Balance:");
-  lcd.gotoXY(0,1);
-  lcd.print(account_balance);
-  lcd.print(EEPROM.read(0));
-  }
-  //Max balance is 255 and will let you know if its full
-  else{
-    lcd.clear();
-    lcd.print("Account");
-    lcd.gotoXY(0,1);
-    lcd.print("is full!");
-    delay(2000);   
+    //Max balance is 255 and will let you know if its full
+    if ( (account_balance + money_deposit) >= 205){
+      account_balance = 255;
+      EEPROM.write(0, account_balance);
+      lcd.clear();
+      lcd.print("Account");
+      lcd.gotoXY(0,1);
+      lcd.print("is full!");
+      delay(2000); 
+    }
+    else {
+      account_balance += money_deposit;
+      EEPROM.write(0, account_balance);
+      lcd.clear();
+      lcd.gotoXY(0,0);
+      lcd.print("Balance:");
+      lcd.gotoXY(0,1);
+      lcd.print(account_balance);
+      lcd.print(EEPROM.read(0));
   }
 }
 //Function for sending you back to main menu
