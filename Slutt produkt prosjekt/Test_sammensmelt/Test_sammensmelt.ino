@@ -121,16 +121,19 @@ void updateMenu() {
       lcd.clear();
       lcd.print(">Circle");
       lcd.gotoXY(0,1);
-      lcd.print("Back");
+      lcd.print("Cone");
       break;
     case 13:
+      lcd.clear();
+      lcd.print(">Cone");
+      lcd.gotoXY(0,1);
+      lcd.print("Back");
+      break;
+    case 14:
       lcd.clear();
       lcd.print(">Back");
       lcd.gotoXY(0,1);
       lcd.print(" ");
-      break;
-    case 14:
-      menu = 13;
       break;
     case 15:
       menu = 14;
@@ -345,30 +348,40 @@ void action12(){
 
 //This function sends you back to the main menu
 void action13(){
-  lcd.gotoXY(0,0);
-  lcd.print("Gyro");
-  lcd.gotoXY(0,1);
-  lcd.print("Calib");
-  turnSensorSetup();
-  delay(500);
-  turnSensorReset();
-  lcd.clear();
-  lcd.gotoXY(0,0);
-  lcd.print("Press B");
-  lcd.gotoXY(0,1);
-  lcd.print("to start");
-  buttonB.waitForPress();
-  runGyro = true;
-  stepNum = 0;
-  while ( runGyro ){
-    turnSensorUpdate();
-    angle = getAngle();
-    coneDrive();
-    // Update the display
-    lcd.gotoXY(0, 0);
-    lcd.print(angle);
-    lcd.print(" ");
-    
+  if ( account_balance >= 10){
+    account_balance -= 10;
+    EEPROM.write(0, account_balance);
+    lcd.gotoXY(0,0);
+    lcd.print("Gyro");
+    lcd.gotoXY(0,1);
+    lcd.print("Calib");
+    turnSensorSetup();
+    delay(500);
+    turnSensorReset();
+    lcd.clear();
+    lcd.gotoXY(0,0);
+    lcd.print("Press B");
+    lcd.gotoXY(0,1);
+    lcd.print("to start");
+    buttonB.waitForPress();
+    runGyro = true;
+    stepNum = 0;
+    while ( runGyro ){
+      turnSensorUpdate();
+      angle = getAngle();
+      coneDrive();
+      // Update the display
+      lcd.gotoXY(0, 0);
+      lcd.print(angle);
+      lcd.print(" ");
+    }
+  }
+  else{
+    lcd.clear();
+    lcd.print("To low");
+    lcd.gotoXY(0,1);
+    lcd.print("balance");
+    delay(2000);
   }
 }
 
