@@ -107,13 +107,13 @@ void updateMenu() {
       break;
     case 10:
       lcd.clear();
-      lcd.print(">Turn");
+      lcd.print(">Straight");
       lcd.gotoXY(0,1);
-      lcd.print("90Degree");
+      lcd.print("Square");
       break;
     case 11:
       lcd.clear();
-      lcd.print(">90Degree");
+      lcd.print(">Square");
       lcd.gotoXY(0,1);
       lcd.print("Circle");
       break;
@@ -271,12 +271,12 @@ void action10(){
     EEPROM.write(0, account_balance);
     lcd.clear();
     lcd.print("Driving");
-    delay(1500);
+    turnSensorSetup();
+    delay(500);
+    turnSensorReset();
     motors.setSpeeds(200, 200); // drives forward for 2 second
     delay(2000);
     motors.setSpeeds(0, 0); // stops car 100 ms to give motors a break
-    turnSensorSetup();
-    turnSensorReset();
     motors.setSpeeds(150, -150);// turning the car 180 degrees
     turnSensorUpdate();
     angle = getAngle();
@@ -309,12 +309,14 @@ void action11(){
     EEPROM.write(0, account_balance);
     lcd.clear();
     lcd.print("Turning");
-    delay(1500);
+    turnSensorSetup();
+    delay(500);
+    turnSensorReset();    
     for(int i=0;i<4;i++){
       motors.setSpeeds(200, 200); // drives forward
       delay(500);
       motors.setSpeeds(0, 0); // stops car
-      turnSensorSetup();
+      delay(20);
       turnSensorReset();
       motors.setSpeeds(150, -150);// turning the car 180 degrees
       turnSensorUpdate();
