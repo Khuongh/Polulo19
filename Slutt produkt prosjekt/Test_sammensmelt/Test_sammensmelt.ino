@@ -28,7 +28,7 @@ bool linePID = false;
 bool lineSTD = false;
 int stepNum = 0;
 int coneNum = 0;
-bool runGyro
+bool runGyro = false;
 
 // --- Helper functions
 int32_t getAngle() {
