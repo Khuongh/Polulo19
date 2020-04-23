@@ -308,7 +308,7 @@ void action11(){
       delay(500);
       motors.setSpeeds(0, 0); // stops car
       delay(500);
-      motors.setSpeeds(-150, 150); // turns car 90 degrees to the left
+      motors.setSpeeds(150, -150); // turns car 90 degrees to the left
       delay(470);
       motors.setSpeeds(0,0);
       delay(500);
