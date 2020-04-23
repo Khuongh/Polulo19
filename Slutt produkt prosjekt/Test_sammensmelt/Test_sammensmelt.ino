@@ -49,7 +49,6 @@ void setup() {
   linesensor.initFiveSensors();
   //Sends you to the start of the mnu
   updateMenu();
-  EEPROM.write(0, 0);
 }
 
 void loop() {
