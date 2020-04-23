@@ -694,8 +694,10 @@ void action31(){
     account_balance += money_deposit;
    EEPROM.write(0, account_balance);
   lcd.clear();
+  lcd.gotoXY(0,0);
   lcd.print("Balance:");
   lcd.gotoXY(0,1);
+  lcd.print(account_balance);
   lcd.print(EEPROM.read(0));
   }
   //Max balance is 255 and will let you know if its full
