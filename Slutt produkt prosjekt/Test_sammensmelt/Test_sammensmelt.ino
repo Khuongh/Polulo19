@@ -28,22 +28,27 @@ bool lineSTD = false;
 int menu = 1;
 
 void setup() {
+  //Iniates the LCD and linesensors
   lcd.init();
   linesensor.initFiveSensors();
+  //Sends you to the start of the mnu
   updateMenu();
 }
 
 void loop() {
+  //Button A sends you "downwards" on the menu
   if (buttonA.getSingleDebouncedPress()){
     menu++;
     updateMenu();
     delay(100);
   }
+  //Button C sends you "upwards" on the manu
   if (buttonC.getSingleDebouncedPress()){
     menu--;
     updateMenu();
     delay(100);
   }
+  //Button B sends you one step depper in the menu
   if (buttonB.getSingleDebouncedPress()){
     executeAction();
     updateMenu();
@@ -51,6 +56,10 @@ void loop() {
   }
 }
 
+//This is a function that updates what you see on the LCD
+//If you go "out" of the menu area, you are sent back into the last place you were
+//The menu has 3 main menus, Autonom, Line and Account. In each of these you have the undermenu
+//In the under menu you choose what "action" the Zumo are going to execute
 void updateMenu() {
   switch (menu) {
     case 0:
@@ -72,16 +81,10 @@ void updateMenu() {
       lcd.clear();
       lcd.print(">Account");
       lcd.gotoXY(0, 1);
-      lcd.print("Battery");
-      break;
-    case 4:
-      lcd.clear();
-      lcd.print(">Battery");
-      lcd.gotoXY(0, 1);
       lcd.print(" ");
       break;
-    case 5:
-      menu = 4;
+    case 4:
+      menu = 3;
       break;
     case 9:
       menu = 10;
@@ -169,6 +172,7 @@ void updateMenu() {
   }
 }
 
+//This function executes the menu that you have chosen
 void executeAction() {
   switch (menu) {
     case 1:
@@ -179,9 +183,6 @@ void executeAction() {
       break;
     case 3:
       action3();
-      break;
-    case 4:
-      action4();
       break;
     case 10:
       action10();
@@ -220,43 +221,39 @@ void executeAction() {
       
   }
 }
-
+//This function sends you to the undermenu of "Autonom"
 void action1() {
   lcd.clear();
   menu = 10;
   }
-     
+//This function sends you to the undermenu of "Line"
 void action2() {
   lcd.clear();
   menu = 20;
 }
-
+//This function send you to the undermenu of "Account"
 void action3() {
   lcd.clear();
   menu = 30;
 }
 
 
-void action4() {
-  lcd.clear();
-  lcd.print(">Exec 4");
-  delay(1500);
-}
-
+//Function for driving straight forward, stop, turn 180 degree and drive back
+//This function cost 10 "units", if you dont have enough in your account the LCD will let you know and you have to fill up your account first.
 void action10(){
   if ( account_balance >= 10){
     account_balance -= 10;
     EEPROM.write(0, account_balance);
     lcd.clear();
-    lcd.print(">Turning");
+    lcd.print("Driving");
     delay(1500);
     motors.setSpeeds(200, 200); // drives forward for 1 second
     delay(5000);
-    motors.setSpeeds(0, 0); // stops car 1 ms to give motors a break
+    motors.setSpeeds(0, 0); // stops car 100 ms to give motors a break
     delay(100);
     motors.setSpeeds(150, -150);// turning the car 180 degrees
     delay(950);
-    motors.setSpeeds(0, 0); //stops car for 1 ms
+    motors.setSpeeds(0, 0); //stops car for 100 ms
     delay(100);
     motors.setSpeeds(200, 200); // drives back to start
     delay(5000);
@@ -271,12 +268,15 @@ void action10(){
   }
 }
 
+//Function for the Zumo to drive in a square, returning where it started
+//This function cost 10 "units", if you dont have enough in your account the LCD will let you know and you have to fill up your account first.
+
 void action11(){
   if ( account_balance >= 10){
     account_balance -= 10;
     EEPROM.write(0, account_balance);
     lcd.clear();
-    lcd.print(">90Degree");
+    lcd.print("Turning");
     delay(1500);
     for(int i=0;i<4;i++){
       motors.setSpeeds(200, 200); // drives forward
@@ -298,12 +298,15 @@ void action11(){
   }
 }
 
+//Function for the Zumo to drive in a circle
+//This function cost 10 "units", if you dont have enough in your account the LCD will let you know and you have to fill up your account first.
+
 void action12(){
   if ( account_balance >= 10){
     account_balance -= 10;
     EEPROM.write(0, account_balance);
     lcd.clear();
-    lcd.print(">Circle");
+    lcd.print("Circling");
     delay(1500);
     motors.setSpeeds(80, 200); //Start turning
     delay(3750);
@@ -318,78 +321,96 @@ void action12(){
   }
 }
 
+//This function sends you back to the main menu
 void action13(){
   lcd.clear();
   menu = 1;
 }
 
+//Function for the Zumo to drive "linesensor" without PD - regulator.
+//The zumo follows the line until the "B" button on the car is pressed
 void action20(){
-  lcd.clear();
-  lineSTD = true;
-  tapeNum = 0;
-  delay(1000);
-  while ( lineSTD ){
-    int position = linesensor.readLine(linesensorValues);
-    bool myTape = false;
-    if ( buttonB.isPressed()){
-      lineSTD = false;  
-      break;
-    }
-   
-    if ( linesensorValues[0] >= 800 && linesensorValues[1] >= 800 && linesensorValues[2] >= 800 && linesensorValues[3] >=800 && linesensorValues[4] >=800 ){
-      motors.setSpeeds(0,0);
-      delay(500);
-      myTape = true;
+  if ( account_balance >= 10){
+    account_balance -= 10;
+    lcd.clear();
+    lineSTD = true;
+    tapeNum = 0;
+    delay(1000);
+    while ( lineSTD ){
+      int position = linesensor.readLine(linesensorValues);//Reads the value of the linesensors
+      bool myTape = false;
+      //Breaks out of the "while" loop and sends you back to the menu
       if ( buttonB.isPressed()){
         lineSTD = false;  
         break;
       }
+       //When all of the linesensor reads a higher value than 800, the zumo is now either on a dead end, theres missing tape or the zumo has been lifted up.
+      if ( linesensorValues[0] >= 800 && linesensorValues[1] >= 800 && linesensorValues[2] >= 800 && linesensorValues[3] >=800 && linesensorValues[4] >=800 ){
+        motors.setSpeeds(0,0);  //Stops the car
+        delay(500);             //A small delay so you can press the "B" button to stop the linefollower
+        myTape = true;
+        if ( buttonB.isPressed()){
+          lineSTD = false;  
+          break;
+        }
+      }
+      //Prints linesensors value on lcd
+      lcd.gotoXY(0,0);
+      lcd.print(position);
+      lcd.gotoXY(0,1);
+      lcd.print(tapeNum);
+      //Using function to choose motorpower
+      direct(position, myTape, tapeNum);
+      delay(50);
     }
-    
-   //Prints linesensors value on lcd
-   lcd.gotoXY(0,0);
-   lcd.print(position);
-   lcd.gotoXY(0,1);
-   lcd.print(tapeNum);
-   
-   //Using function to choose motorpower
-   direct(position, myTape, tapeNum);
-   delay(50);
+    //Stops the car and goes back to main manu
+    motors.setSpeeds(0,0);
+    lcd.clear();
+    lcd.gotoXY(0,0);
+    lcd.print("Back to");
+    lcd.gotoXY(0,1);
+    lcd.print("Meny");
+    delay(1000);
+    menu = 1;
   }
-  motors.setSpeeds(0,0);
-  lcd.clear();
-  lcd.gotoXY(0,0);
-  lcd.print("Back to");
-  lcd.gotoXY(0,1);
-  lcd.print("Meny");
-  delay(1000);
-  menu = 1;
+  else{
+    //To low balance in account.
+    lcd.clear();
+    lcd.print("To low");
+    lcd.gotoXY(0,1);
+    lcd.print("balance");
+    delay(2000);
+  }
 }
 
-
+//Function that decides what motorpower the linefollower function without PD - regulator has
 void direct(int x, bool myTape, int Num ){
-
+  //Missing tape, the zumo drives straight for 2 seconds with reduced speed
   if ( myTape && Num == 0 ){
     motors.setSpeeds(100,100);
     delay(2000);
-    tapeNum = 1;
+    tapeNum = 1; // Indicating that it has come back on track
   }
+  //Dead end, the zumo drives back into the track
   else if ( myTape && Num == 1 ){
-    motors.setSpeeds(0,0);
+    motors.setSpeeds(0,0);// Stops the zumo
     delay(200);
-    motors.setSpeeds(100, -100);
+    motors.setSpeeds(100, -100);//Turns the zumo 180 degree
     delay(1800);
-    motors.setSpeeds(100,100);
+    motors.setSpeeds(100,100);//Drive back to the turn
     delay(1800);
-    motors.setSpeeds(0,0);
+    motors.setSpeeds(0,0);//Stops the zumo
     delay(20);
-    motors.setSpeeds(100, -100);
+    motors.setSpeeds(100, -100);//Turns 90 degree
     delay(900);
-    motors.setSpeeds(0,0);
+    motors.setSpeeds(0,0);//Stops the zumo
     delay(20);
-    motors.setSpeeds(100,100);
-    tapeNum = 0;
+    motors.setSpeeds(100,100);//Continues on the track
+    tapeNum = 0;  // Indicating that has come back on the track
   }
+  //The zumo has different motorpowers depending of what the linesensor reads.
+  //If it reads under 2000, it will give more motorpower to the right wheel
+  //If it reads over 2000 it will read more motorpower to the left wheel
   else if( x < 1500){
     motors.setSpeeds(0,175);
   }
@@ -420,100 +441,130 @@ void direct(int x, bool myTape, int Num ){
   }
 
 }
-
+//Function for the Zumo to drive line follower with PD - regulator
+//This function cost 10 "units", if you dont have enough in your account the LCD will let you know and you have to fill up your account first.
 void action21(){
-  lcd.clear();
-  linePID = true;
-  tapeNum = 0;
-  delay(1000);
-  while ( linePID ){
-      //Reads linesensor value and "error"
-    if ( buttonB.isPressed()){
-      linePID = false;  
-      break;
-    }
-    int position = linesensor.readLine(linesensorValues);
-    int e = position - 2000; 
-     //Calculating speed difference & setting speed
-    int u = P * e + D *(e-lastE);
-    lastE = e;
-    int leftSpeed = (int)maxSpeed + u;
-    int rightSpeed = (int)maxSpeed - u;
-    //Contraining our motors between 0 and maxspeed
-    leftSpeed = constrain(leftSpeed, 0, (int)maxSpeed);
-    rightSpeed = constrain(rightSpeed, 0, (int)maxSpeed);
-    //Motor output
-    if ( linesensorValues[0] >= 800 && linesensorValues[1] >= 800 && linesensorValues[2] >= 800 && linesensorValues[3] >=800 && linesensorValues[4] >=800){
-      motors.setSpeeds(0,0);
-      delay(500);
+  if ( account_balance >= 10){
+    account_balance -= 10;
+    lcd.clear();
+    linePID = true;
+    tapeNum = 0;
+    delay(1000);
+    while ( linePID ){
+      //Goes out of the function if the "B" button is pressed
       if ( buttonB.isPressed()){
-      linePID = false;  
-      break;
-    }
-      blackTape();
-     }
-    motors.setSpeeds(leftSpeed, rightSpeed);
-    //Prints linesensors on lcd
-    lcd.print(tapeNum);
+        linePID = false;  
+        break;
+      }
+      //Reads linesensor value and "error"
+      int position = linesensor.readLine(linesensorValues);
+      int e = position - 2000;  // calculates the error
+      //Calculating speed difference & setting speed
+      int u = P * e + D *(e-lastE);
+      lastE = e;                //Saves the last error
+      int leftSpeed = (int)maxSpeed + u;
+      int rightSpeed = (int)maxSpeed - u;
+      //Contraining our motors between 0 and maxspeed
+      leftSpeed = constrain(leftSpeed, 0, (int)maxSpeed);
+      rightSpeed = constrain(rightSpeed, 0, (int)maxSpeed);
+       //When all of the linesensor reads a higher value than 800, the zumo is now either on a dead end, theres missing tape or the zumo has been lifted up.
+      if ( linesensorValues[0] >= 800 && linesensorValues[1] >= 800 && linesensorValues[2] >= 800 && linesensorValues[3] >=800 && linesensorValues[4] >=800){
+        motors.setSpeeds(0,0); // stops the zumo  
+        delay(500);             // a small delay to let you press the "B" button to get out of the function
+        if ( buttonB.isPressed()){
+        linePID = false;  
+        break;
+      }
+      //Calling the function for either driving over missing tape or dead end.
+        blackTape();
+       }
+      //Motor output
+      motors.setSpeeds(leftSpeed, rightSpeed);
+      //Prints linesensors on lcd
+      lcd.print(tapeNum);
+      lcd.gotoXY(0,0);
+  }
+  //Stops the Zumo and sends it back to main menu
+    motors.setSpeeds(0,0);
+    lcd.clear();
     lcd.gotoXY(0,0);
-}
-  motors.setSpeeds(0,0);
-  lcd.clear();
-  lcd.gotoXY(0,0);
-  lcd.print("Back to");
-  lcd.gotoXY(0,1);
-  lcd.print("Meny");
-  delay(1000);
-  menu = 1;
+    lcd.print("Back to");
+    lcd.gotoXY(0,1);
+    lcd.print("Meny");
+    delay(1000);
+    menu = 1;
+  }
+  else{
+    //To low balance in account.
+    lcd.clear();
+    lcd.print("To low");
+    lcd.gotoXY(0,1);
+    lcd.print("balance");
+    delay(2000);
+  }
 }
 
 void blackTape(){
+  //Missing tape, it will now drive straight with reduced speed 
   if( tapeNum == 0  ){
     motors.setSpeeds(100,100);
     delay(2000);
-    tapeNum = 1;
+    tapeNum = 1; //Indicating that it has come over missing tape
   }
+  //Dead end, the zumo drives back into the track
   else if ( tapeNum == 1){
-    motors.setSpeeds(0,0);
+    motors.setSpeeds(0,0);// Stops the zumo
     delay(200);
-    motors.setSpeeds(100, -100);
+    motors.setSpeeds(100, -100);//Turns the zumo 180 degree
     delay(1800);
-    motors.setSpeeds(100,100);
+    motors.setSpeeds(100,100);//Drive back to the turn
     delay(1800);
-    motors.setSpeeds(0,0);
+    motors.setSpeeds(0,0);//Stops the zumo
     delay(20);
-    motors.setSpeeds(100, -100);
+    motors.setSpeeds(100, -100);//Turns 90 degree
     delay(900);
-    motors.setSpeeds(0,0);
+    motors.setSpeeds(0,0);//Stops the zumo
     delay(20);
-    motors.setSpeeds(100,100);
-    tapeNum = 0;
+    motors.setSpeeds(100,100);//Continues on the track
+    tapeNum = 0; // Indicating that has come back on the track
   }
 }
 
-
+//Function for calibrating the line sensors
+//This function cost 10 "units", if you dont have enough in your account the LCD will let you know and you have to fill up your account first.
 void action22(){
-  lcd.clear();
-  lcd.print("Cali -");
-  lcd.gotoXY(0,1);
-  lcd.print("brating");
-  delay(1000);
-  int i = 0;
-  while(i < 100){
-    linesensor.calibrate();
-    motors.setSpeeds(150, -150);
-    i++;
+  if ( account_balance >= 10){
+    account_balance -= 10;  
+    lcd.clear();
+    lcd.print("Cali -");
+    lcd.gotoXY(0,1);
+    lcd.print("brating");
+    delay(1000);
+    int i = 0;
+    while(i < 100){
+      linesensor.calibrate();
+      motors.setSpeeds(150, -150);
+      i++;
+    }
+    motors.setSpeeds(0,0); // Stops the Zumo
+    buzzer.play(">g32>>c32"); //Buzzer for letting you know its done calibrating
+    lcd.clear();
   }
-  motors.setSpeeds(0,0);
-  buzzer.play(">g32>>c32");
-  lcd.clear();
+  else{
+    //To low balance in account.
+    lcd.clear();
+    lcd.print("To low");
+    lcd.gotoXY(0,1);
+    lcd.print("balance");
+    delay(2000);
+  }
 }
-
+//Function for sending you back to main menu
 void action23(){
   lcd.clear();
   menu = 1;
 }
-
+//Function for reading the Account Balance
 void action30(){
   lcd.clear();
   lcd.print("Balance:");
@@ -521,7 +572,7 @@ void action30(){
   lcd.print(EEPROM.read(0));
   delay(2000);
 }
-
+//Function for filling up your Account Balance
 void action31(){
   lcd.clear();
   if ( account_balance <= 250){
@@ -532,6 +583,7 @@ void action31(){
   lcd.gotoXY(0,1);
   lcd.print(EEPROM.read(0));
   }
+  //Max balance is 255 and will let you know if its full
   else{
     lcd.clear();
     lcd.print("Account");
@@ -540,6 +592,7 @@ void action31(){
     delay(2000);   
   }
 }
+//Function for sending you back to main menu
 void action32(){
   lcd.clear();
   menu = 1;

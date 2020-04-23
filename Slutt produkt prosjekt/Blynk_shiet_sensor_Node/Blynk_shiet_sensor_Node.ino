@@ -356,6 +356,7 @@ void myTimerEvent7(){
 
 void myTimerEvent8(){
   //Blinking LED if theres an alarm on the system
+  //And Changing buzzer tones
   if ( alarmNumb != 0){
     if (led3.getValue()){
       led3.off();
@@ -373,7 +374,11 @@ void myTimerEvent8(){
 }
 
 
+/*The virtual pins V16, V26, V36 and V46 are menu options on BLYNK that lets you
+ * choose if the sensors are active or inactive
+*/
 
+//Temperature menu option
 BLYNK_WRITE(V16){
   switch ( param.asInt())
   {
@@ -389,7 +394,7 @@ BLYNK_WRITE(V16){
       break;
   }
 }
-
+//Photoresistor menu option
 BLYNK_WRITE(V26){
   switch ( param.asInt())
   {
@@ -405,7 +410,7 @@ BLYNK_WRITE(V26){
       break;
   }
 }
-
+//Tiltsensor menu option
 BLYNK_WRITE(V36){
   switch ( param.asInt())
   {
@@ -421,7 +426,7 @@ BLYNK_WRITE(V36){
       break;
   }
 }
-
+//Distance sensor menu option
 BLYNK_WRITE(V46){
   switch ( param.asInt())
   {
@@ -557,8 +562,8 @@ void setup()
   timer.setInterval(750L, myTimerEvent4);//HC-SR04 sensor every sec
   timer.setInterval(10000L, myTimerEvent5);//Calculating average every 10sec
   timer.setInterval(30000L, myTimerEvent6);//Max & Min calue every 30 sec
-  timer.setInterval(20L, myTimerEvent7); 
-  timer.setInterval(2050L, myTimerEvent8);
+  timer.setInterval(20L, myTimerEvent7); //Servo test every 20 ms
+  timer.setInterval(2050L, myTimerEvent8);//Alarm LED blink and buzzer tone change
   //Start time set
   startTime = millis();
 }
@@ -610,7 +615,7 @@ void alarmFunction(int temp, int photo, int tilt, int distance){
   alarmSwitch(alarmNumb);
   
 }
-
+//Switch/case function for alarm number
 void alarmSwitch(int alarmNumb){
   
   switch( alarmNumb ){
@@ -730,6 +735,6 @@ void loop()
 {
   Blynk.run();
   timer.run(); // Initiates BlynkTimer
-  server.handleClient();
+  server.handleClient();//Runs the html webpage
 
 }
