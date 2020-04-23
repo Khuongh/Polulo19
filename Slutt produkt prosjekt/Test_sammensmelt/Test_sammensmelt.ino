@@ -277,6 +277,7 @@ void action10(){
     motors.setSpeeds(200, 200); // drives forward for 2 second
     delay(2000);
     motors.setSpeeds(0, 0); // stops car 100 ms to give motors a break
+    delay(50);
     motors.setSpeeds(150, -150);// turning the car 180 degrees
     turnSensorUpdate();
     angle = getAngle();
@@ -316,7 +317,7 @@ void action11(){
       motors.setSpeeds(200, 200); // drives forward
       delay(500);
       motors.setSpeeds(0, 0); // stops car
-      delay(20);
+      delay(50);
       turnSensorReset();
       motors.setSpeeds(150, -150);// turning the car 180 degrees
       turnSensorUpdate();
@@ -348,9 +349,16 @@ void action12(){
     EEPROM.write(0, account_balance);
     lcd.clear();
     lcd.print("Circling");
-    delay(1500);
+    turnSensorSetup();
+    delay(500);
+    turnSensorReset(); 
     motors.setSpeeds(80, 200); //Start turning
-    delay(3750);
+    turnSensorUpdate();
+    angle = getAngle();
+    while ( angle != 0){
+      turnSensorUpdate();
+      angle = getAngle();
+    }
     motors.setSpeeds(0, 0); // stops car entirely
   }
   else{
