@@ -17,7 +17,7 @@ L3G gyro;
 unsigned int linesensorValues[5];
 
 int account_balance = EEPROM.read(0);
-const int money_deposit = 5; // Fixed amount of money to deposit (when e.g pushing button)
+const int money_deposit = 50; // Fixed amount of money to deposit (when e.g pushing button)
 //Creating global variables
 const double P = 0.3;
 const double D = 8;
@@ -272,12 +272,17 @@ void action10(){
     lcd.clear();
     lcd.print("Driving");
     delay(1500);
-    motors.setSpeeds(200, 200); // drives forward for 1 second
-    delay(5000);
+    motors.setSpeeds(200, 200); // drives forward for 2 second
+    delay(2000);
     motors.setSpeeds(0, 0); // stops car 100 ms to give motors a break
     delay(100);
+    turnSensorSetup();
+    turnSensorReset();
     motors.setSpeeds(150, -150);// turning the car 180 degrees
-    delay(950);
+    angle = getAngle();
+    while ( angle <= 180 ){
+      angle = getAngle();
+    }
     motors.setSpeeds(0, 0); //stops car for 100 ms
     delay(100);
     motors.setSpeeds(200, 200); // drives back to start
