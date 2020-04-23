@@ -275,7 +275,6 @@ void action10(){
     motors.setSpeeds(200, 200); // drives forward for 2 second
     delay(2000);
     motors.setSpeeds(0, 0); // stops car 100 ms to give motors a break
-    delay(100);
     turnSensorSetup();
     turnSensorReset();
     motors.setSpeeds(150, -150);// turning the car 180 degrees
@@ -288,7 +287,7 @@ void action10(){
     motors.setSpeeds(0, 0); //stops car for 100 ms
     delay(100);
     motors.setSpeeds(200, 200); // drives back to start
-    delay(5000);
+    delay(2000);
     motors.setSpeeds(0, 0); // stops car
   }
   else{
