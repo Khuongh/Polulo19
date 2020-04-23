@@ -1,5 +1,7 @@
 #include <EEPROM.h> //Including EEPROM library
 #include <Zumo32U4.h>
+#include "TurnSensor.h"
+
 
 Zumo32U4ButtonA buttonA;
 Zumo32U4ButtonB buttonB;
@@ -8,6 +10,7 @@ Zumo32U4LCD lcd;
 Zumo32U4Motors motors;
 Zumo32U4LineSensors linesensor;
 Zumo32U4Buzzer buzzer;
+L3G gyro;
 
 
 //Creating int value for sensvaluer
@@ -15,7 +18,7 @@ unsigned int linesensorValues[5];
 
 int account_balance = EEPROM.read(0);
 const int money_deposit = 5; // Fixed amount of money to deposit (when e.g pushing button)
-
+//Creating global variables
 const double P = 0.3;
 const double D = 8;
 double lastE = 0;
@@ -23,6 +26,19 @@ const unsigned char maxSpeed = 200;
 int tapeNum = 0;
 bool linePID = false;
 bool lineSTD = false;
+int stepNum = 0;
+int coneNum = 0;
+bool runGyro
+
+// --- Helper functions
+int32_t getAngle() {
+  // turnAngle is a variable defined in TurnSensor.cpp
+  // This fancy math converts the number into degrees turned since the
+  // last sensor reset.
+  return (((int32_t)turnAngle >> 16) * 360) >> 16;
+}
+
+int32_t angle = getAngle();
 
 
 int menu = 1;
@@ -99,7 +115,7 @@ void updateMenu() {
       lcd.clear();
       lcd.print(">90Degree");
       lcd.gotoXY(0,1);
-      lcd.print("90Circle");
+      lcd.print("Circle");
       break;
     case 12:
       lcd.clear();
@@ -115,6 +131,9 @@ void updateMenu() {
       break;
     case 14:
       menu = 13;
+      break;
+    case 15:
+      menu = 14;
       break;
     case 19:
       menu = 20;
@@ -195,6 +214,9 @@ void executeAction() {
       break;
     case 13:
       action13();
+      break;
+    case 14:
+      action14();
       break;
     case 20:
       action20();
@@ -323,6 +345,78 @@ void action12(){
 
 //This function sends you back to the main menu
 void action13(){
+  lcd.gotoXY(0,0);
+  lcd.print("Gyro");
+  lcd.gotoXY(0,1);
+  lcd.print("Calib");
+  turnSensorSetup();
+  delay(500);
+  turnSensorReset();
+  lcd.clear();
+  lcd.gotoXY(0,0);
+  lcd.print("Press B");
+  lcd.gotoXY(0,1);
+  lcd.print("to start");
+  buttonB.waitForPress();
+  runGyro = true;
+  stepNum = 0;
+  while ( runGyro ){
+    turnSensorUpdate();
+    angle = getAngle();
+    coneDrive();
+    // Update the display
+    lcd.gotoXY(0, 0);
+    lcd.print(angle);
+    lcd.print(" ");
+    
+  }
+}
+
+void coneDrive (){
+  
+  while ( stepNum == 0){
+    motors.setSpeeds(-100, 100);
+    turnSensorUpdate();
+    angle = getAngle();
+    lcd.gotoXY(0, 0);
+    lcd.print(angle);
+    lcd.print(" ");    
+    if (angle >= 55){
+      motors.setSpeeds(0,0);
+      delay(20);
+      stepNum = 1;
+      break;
+    }
+  }
+
+  if (coneNum >= 3){
+    motors.setSpeeds(100,200);
+    if ( angle >= 0){
+      motors.setSpeeds(0,0);
+      stepNum = 0;
+      coneNum = 0;
+      runGyro = false;
+    }
+  }
+
+  else if (stepNum == 1){
+    motors.setSpeeds(200, 100);
+    if ( angle <= -55){
+      stepNum = 2;
+      coneNum += 1;
+
+    }
+  }
+  else if (stepNum == 2){
+    motors.setSpeeds(100,200);
+    if (angle >= 55){
+      stepNum = 1;
+    }
+  }
+}
+
+//This function sends you back to the main menu
+void action14(){
   lcd.clear();
   menu = 1;
 }
