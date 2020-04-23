@@ -332,6 +332,7 @@ void action13(){
 void action20(){
   if ( account_balance >= 10){
     account_balance -= 10;
+    EEPROM.write(0, account_balance);
     lcd.clear();
     lineSTD = true;
     tapeNum = 0;
@@ -446,6 +447,7 @@ void direct(int x, bool myTape, int Num ){
 void action21(){
   if ( account_balance >= 10){
     account_balance -= 10;
+    EEPROM.write(0, account_balance);
     lcd.clear();
     linePID = true;
     tapeNum = 0;
@@ -535,6 +537,7 @@ void blackTape(){
 void action22(){
   if ( account_balance >= 10){
     account_balance -= 10;  
+    EEPROM.write(0, account_balance);
     lcd.clear();
     lcd.print("Cali -");
     lcd.gotoXY(0,1);
