@@ -278,6 +278,7 @@ void action10(){
     turnSensorSetup();
     turnSensorReset();
     motors.setSpeeds(150, -150);// turning the car 180 degrees
+    turnSensorUpdate();
     angle = getAngle();
     while ( angle >= -180 ){
       turnSensorUpdate();
@@ -313,9 +314,16 @@ void action11(){
       motors.setSpeeds(200, 200); // drives forward
       delay(500);
       motors.setSpeeds(0, 0); // stops car
-      delay(500);
-      motors.setSpeeds(150, -150); // turns car 90 degrees to the left
-      delay(470);
+      turnSensorSetup();
+      turnSensorReset();
+      motors.setSpeeds(150, -150);// turning the car 180 degrees
+      turnSensorUpdate();
+      angle = getAngle();
+      while ( angle >= -90 ){
+        turnSensorUpdate();
+        angle = getAngle();
+        if ( angle <= -90) break;
+     }
       motors.setSpeeds(0,0);
       delay(500);
     }
