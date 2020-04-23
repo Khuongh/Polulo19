@@ -711,7 +711,7 @@ void action30(){
 void action31(){
   lcd.clear();
     //Max balance is 255 and will let you know if its full
-    if ( (account_balance + money_deposit) >= 225){
+    if ( (account_balance + money_deposit) >= 255){
       account_balance = 255;
       EEPROM.write(0, account_balance);
       lcd.clear();
