@@ -17,7 +17,7 @@ L3G gyro;
 unsigned int linesensorValues[5];
 
 int account_balance = EEPROM.read(0);
-const int money_deposit = 50; // Fixed amount of money to deposit (when e.g pushing button)
+const int money_deposit = 30; // Fixed amount of money to deposit (when e.g pushing button)
 //Creating global variables
 const double P = 0.3;
 const double D = 8;
@@ -711,7 +711,7 @@ void action30(){
 void action31(){
   lcd.clear();
     //Max balance is 255 and will let you know if its full
-    if ( (account_balance + money_deposit) >= 205){
+    if ( (account_balance + money_deposit) >= 225){
       account_balance = 255;
       EEPROM.write(0, account_balance);
       lcd.clear();
@@ -727,8 +727,8 @@ void action31(){
       lcd.gotoXY(0,0);
       lcd.print("Balance:");
       lcd.gotoXY(0,1);
-      lcd.print(account_balance);
       lcd.print(EEPROM.read(0));
+      delay(1000);
   }
 }
 //Function for sending you back to main menu
