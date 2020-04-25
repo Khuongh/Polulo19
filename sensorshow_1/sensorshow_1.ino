@@ -33,11 +33,11 @@ void setup() {
 void loop() {
   lcd.print("Press A");
   buttonA.waitForButton();
-  for (int i=0; i<9; i++){
+  for (int i=0; i<8; i++){
     ledRed(0);
     ledGreen(1);
     motors.setSpeeds(100,100);
-    delay(500);
+    delay(1000);
     motors.setSpeeds(0,0);
     delay(20);
     turnSensorReset();
@@ -56,10 +56,10 @@ void loop() {
           delay(20);
           buzzer.play(">g32>>c32");
           break;
-
         }
     }
   }
+  
 
 
 }
