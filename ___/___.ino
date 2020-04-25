@@ -72,7 +72,7 @@ void loop()
    if((millis()-last_ten_sec) >= ten_seconds)               //Kode som regner ut og viser batterinivå hvert tiende sekund
    {
     batteryLevel = batteryCalc(batteryLevel, motorSpeed);
-    EEPROM.update(1, batteryLevel); 
+    EEPROM.write(1, batteryLevel); 
     
     lcd.clear();
     lcd.gotoXY(0,0);
@@ -154,9 +154,9 @@ else if (batteryLevel == 0 )
           batteryLevel += 10; 
           account_balance -= 1; 
           charging_cycles += 1; 
-          EEPROM.update(1, batteryLevel); 
-          EEPROM.update(0, account_balance);
-          EEPROM.update(2, charging_cycles);
+          EEPROM.write(1, batteryLevel); 
+          EEPROM.write(0, account_balance);
+          EEPROM.write(2, charging_cycles);
   
           lcd.clear();
           lcd.gotoXY(0,0);
@@ -194,13 +194,13 @@ else if (batteryLevel == 0 )
       if (buttonA.getSingleDebouncedPress())
       {
         account_balance += 5; 
-        EEPROM.update(0,account_balance);
+        EEPROM.write(0,account_balance);
       }
     }
   }
   
   if (battery_health <= 25) 
-  { 
+  {
     motors.setSpeeds(0, 0); 
     lcd.clear();
     lcd.gotoXY(0,0);
@@ -213,8 +213,8 @@ else if (batteryLevel == 0 )
     
     battery_health = 100; 
     account_balance -= 10; 
-    EEPROM.update(3, battery_health);
-    EEPROM.update(0, account_balance);
+    EEPROM.write(3, battery_health);
+    EEPROM.write(0, account_balance);
   }
   /*if else ( battery_health <= 50)
   { 
@@ -229,7 +229,7 @@ else if (batteryLevel == 0 )
       if (buttonA.getSingleDebouncedPress()) 
       { 
         battery_health += 30; 
-        EEPROM.update(3, battery_health); 
+        EEPROM.write(3, battery_health); 
       }
     }*/
   
@@ -237,13 +237,13 @@ else if (batteryLevel == 0 )
   if (charging_cycles % 5 == 0) 
   { 
     battery_health -= 15;
-    EEPROM.update(3, battery_health); 
+    EEPROM.write(3, battery_health); 
   }
 
   if  ( battery_health > 100 ) 
   { 
     battery_health = 100; 
-    EEPROM.update(3, battery_health); 
+    EEPROM.write(3, battery_health); 
   }
 }
 
