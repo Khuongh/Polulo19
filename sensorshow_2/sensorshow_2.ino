@@ -32,21 +32,21 @@ void loop() {
 //lcd.print(right);
 
   follower(cent_left, cent_right);
-
-  delay(20);
   
 }
 
 void follower(int myCentLeft, int myCentRight){
 
   if ( myCentLeft > myCentRight){
-    motors.setSpeeds(0, 50);
+    motors.setSpeeds(-100, 100);
   }
   else if (myCentRight > myCentLeft){
-    motors.setSpeeds(50, 0);
+    motors.setSpeeds(100, -100);
   }
- else{
-    motors.setSpeeds(75, 75);
+ else {
+    motors.setSpeeds(0,0);
+    delay(10);
+    motors.setSpeeds(100, 100);
   }
     
 }
