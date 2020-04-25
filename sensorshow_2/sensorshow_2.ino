@@ -32,7 +32,7 @@ void loop() {
 
   follower(left, cent_left, cent_right, right);
 
-  delay(50);
+  delay(20);
   
 }
 
