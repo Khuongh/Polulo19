@@ -148,7 +148,6 @@ else if (batteryLevel == 0 )
         lcd.print("A-1kr+10"); 
         lcd.gotoXY(0,1);
         lcd.print("% B)Exit"); 
-        delay(2000);
         if (buttonA.getSingleDebouncedPress())
         { 
           batteryLevel += 10; 
@@ -249,7 +248,7 @@ else if (batteryLevel == 0 )
 
 int batteryCalc(float batteryLevel, float motorSpeed)             //Funksjon som regner ut batterinivå som funkson av hastighet og distanse kjørt
 { 
-  const int batteryDrain = 10;
+  const int batteryDrain   = 10;
   const int topSpeed = 400; 
 
   float actBatteryDrain = (motorSpeed / topSpeed)* batteryDrain; 
