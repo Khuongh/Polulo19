@@ -5,6 +5,7 @@
 //#include "wire.h"
 Zumo32U4ButtonA buttonA;
 Zumo32U4ButtonB buttonB;
+Zumo32U4ButtonC buttonC;
 Zumo32U4Motors motors;
 Zumo32U4LCD lcd;
 Zumo32U4Encoders encoders(&motors);  
@@ -210,21 +211,41 @@ else if (batteryLevel == 0 )
     lcd.write(" batteri"); 
     lcd.display(); 
 
-    if (buttonA.getSingleDebouncedPress()) 
-    { 
-      battery_health = 100; 
-      account_balance -= 10; 
-       
-    }
-  }
-  if else ( battery_health <= 50)
-  { 
+    buttonA.waitForButton() 
     
+    battery_health = 100; 
+    account_balance -= 10; 
+    EEPROM.update(3, battery_health);
+    EEPROM.update(0, account_balance);
+  }
+  /*if else ( battery_health <= 50)
+  { 
+    while (buttonC.getSingleDebouncedPress() == false) 
+    { 
+      lcd.clear();
+      lcd.gotoXY(0,0);
+      lcd.write("A)"); 
+      lcd.gotoXY(0,1);
+      lcd.write("Service"); 
+      lcd.display(); 
+
+      if (buttonA.getSingleDebouncedPress()) 
+      { 
+        battery_health += 30; 
+        EEPROM.update(3, battery_health); 
+      }
+    }*/
   }
   
   if (charging_cycles % 5 == 0) 
   { 
     battery_health -= 15;
+    EEPROM.update(3, battery_health); 
+  }
+
+  if  ( battery_health > 100 ) 
+  { 
+    battery_health = 100; 
     EEPROM.update(3, battery_health); 
   }
 }
