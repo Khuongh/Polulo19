@@ -38,14 +38,14 @@ void loop() {
 
 void follower(int myLeft, int myCentLeft, int myCentRight, int myRight ){
 
-  if ( myLeft > myCentLeft && myLeft > myCentRight && myLeft > myRight){
-    motors.setSpeeds(0, 100);
+  if ( myLeft >= myCentLeft && myLeft >= myCentRight && myLeft >= myRight){
+    motors.setSpeeds(0, 50);
   }
-  else if ( myRight > myCentLeft && myRight > myCentRight && myRight > myLeft){
-    motors.setSpeeds(100, 0);
+  else if ( myRight >= myCentLeft && myRight >= myCentRight && myRight >= myLeft){
+    motors.setSpeeds(50, 0);
   }
     if ( ((myCentLeft + myCentRight)/2) > myRight && ((myCentLeft + myCentRight)/2) > myLeft){
-    motors.setSpeeds(100, 100);
+    motors.setSpeeds(75, 75);
   }
     
 }
