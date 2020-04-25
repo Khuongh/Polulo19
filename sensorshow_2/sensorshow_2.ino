@@ -3,10 +3,12 @@
 Zumo32U4LCD lcd;
 Zumo32U4ProximitySensors proxSensors;
 Zumo32U4Motors motors;
-
+Zumo32U4ButtonA buttonA;
 void setup() {
   // put your setup code here, to run once:
   proxSensors.initThreeSensors();
+  lcd.print("Press A");
+  buttonA.waitForPress();
   
 
 }
@@ -37,13 +39,13 @@ void loop() {
 void follower(int myLeft, int myCentLeft, int myCentRight, int myRight ){
 
   if ( myLeft > myCentLeft && myLeft > myCentRight && myLeft > myRight){
-    motors.setSpeeds(0, 150);
+    motors.setSpeeds(0, 100);
   }
   else if ( myRight > myCentLeft && myRight > myCentRight && myRight > myLeft){
-    motors.setSpeeds(150, 0);
+    motors.setSpeeds(100, 0);
   }
     if ( ((myCentLeft + myCentRight)/2) > myRight && ((myCentLeft + myCentRight)/2) > myLeft){
-    motors.setSpeeds(150, 150);
+    motors.setSpeeds(100, 100);
   }
     
 }
