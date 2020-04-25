@@ -5,6 +5,8 @@ Zumo32U4ProximitySensors proxSensors;
 Zumo32U4Motors motors;
 Zumo32U4ButtonA buttonA;
 
+int lastDir = 0;
+
 void setup() {
   // put your setup code here, to run once:
   proxSensors.initThreeSensors();
@@ -39,14 +41,22 @@ void follower(int myCentLeft, int myCentRight){
 
   if ( myCentLeft > myCentRight){
     motors.setSpeeds(-100, 100);
+    lastDir = 1;
   }
   else if (myCentRight > myCentLeft){
     motors.setSpeeds(100, -100);
+    lastDir = 2;
+  }
+  else if ( myCentRight == myCentLeft && lastDir != 0){
+    motors.setSpeeds(0,0);
+    motors.setSpeeds(100,100);
+    lastDir = 0;
   }
  else {
     motors.setSpeeds(0,0);
     delay(10);
     motors.setSpeeds(100, 100);
+    lastDir = 0;
   }
     
 }
