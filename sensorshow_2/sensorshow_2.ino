@@ -49,6 +49,7 @@ void follower(int myCentLeft, int myCentRight){
   }
   else if ( myCentRight == myCentLeft && lastDir != 0){
     motors.setSpeeds(0,0);
+    delay(20);
     motors.setSpeeds(100,100);
     lastDir = 0;
   }
