@@ -42,7 +42,7 @@ void follower(int myCentLeft, int myCentRight){
   if ( myCentLeft > myCentRight){
     motors.setSpeeds(0, 50);
   }
-  else if (myCentRight > myCentLeft)
+  else if (myCentRight > myCentLeft){
     motors.setSpeeds(50, 0);
   }
  else{
