@@ -45,36 +45,36 @@
  * V9 = Terminal
  * V10 = Temperature Labeled Value
  * V11 = Temperature Gauge
- * V12 = Temperature Live Value Chart
+ * V12 = Temperature Live Value All Chart
  * V13 = Temperatue Average Chart
  * V14 = Temperature Max Value Chart
  * V15 = Temperature Min Vakue chart
  * V16 = Temperature On/Off Menu
- * V17 = 
+ * V17 = Temperature Live Value Chart
  * V20 = Photoresistor Labeled Value
  * V21 = Photoresistor Gauge
- * V22 = Photoresistor Live Value Chart
+ * V22 = Photoresistor Live All Value Chart
  * V23 = Photoresistor Average Chart
  * V24 = Photoresistor Max Value Chart
  * V25 = Photoresistor Min Value Chart
  * V26 = Photoresistor On/Off Menu
- * V27 = 
+ * V27 = Photoresistor Live Value Chart
  * V30 = 
  * V31 = 
- * V32 = Tilt Live Value Chart
+ * V32 = Tilt Live Value All Chart
  * V33 = 
  * V34 = Tilt Max/Min Value Chart
  * V35
  * V36 = Tilt On/Off Menu
- * V37
+ * V37 = Tilt Live Value Chart
  * V40 = Distance Labeled Value
  * V41 = Distance Gauge
- * V42 = Distance Live Value Chart
+ * V42 = Distance Live Value All Chart
  * V43 = Distance Average Chart
  * V44 = Distance Max Value Chart
  * V45 = Distance Min Value Chart
  * V46 = Distance On/Off Menu
- * V47
+ * V47 = Distance Live Value Chart
  * V99 = Test Button For ServoMotor
  * 
 
@@ -138,6 +138,8 @@ int maxPhoto = 0;
 unsigned long calTime = 5000;
 unsigned long averageTime = 30000;
 unsigned long startTime;
+unsigned long blinkTime = 1000;
+unsigned long lastBlink;
 
 //Values for WebServer and arrays
 int averagePhoto;
@@ -169,6 +171,8 @@ int tiltAlarm_Limit = 1;
 int distanceAlarm_Limit = 200;
 int servoAlarmVal = 180;
 int servoResetVal = 0;
+int lastAlarm = 0;
+int alarmCount = 0;
 
   
 
@@ -176,21 +180,22 @@ int servoResetVal = 0;
 void myTimerEvent1()
 {
   //Reading temp value and writing to Blynk
-  if( !testButton && onTemp){
+  if( !testButton && onTemp ){
   valTemp = analogRead(pinTemp);
   float volt = (valTemp / 1023.0);
   tempC = (volt - 0.5) * 100; // converting into Celsius
   readingsTemp[readIndexTemp] = tempC; //Saving the temp into an array
   Blynk.virtualWrite(V10, tempC); //Labeled value Temp
   Blynk.virtualWrite(V11, tempC); // Gauge value Temp
-  Blynk.virtualWrite(V12, tempC); //Chart value Temp
+  Blynk.virtualWrite(V12, tempC); //All Chart value Temp
+  Blynk.virtualWrite(V17, tempC); //Chart value Temp
   readIndexTemp += 1;
   if (readIndexTemp > 50) readIndexTemp = 0; // Resetting readIndexTemp
   }
 }
 
 void myTimerEvent2() {
-  if( !testButton && onPhoto){
+  if( !testButton && onPhoto ){
   //Reads, maps and constrains Fhotoresistor value
   valPhoto = analogRead(pinPhoto);
   valPhoto = map(valPhoto, minPhoto, maxPhoto, 0, 255);
@@ -198,14 +203,15 @@ void myTimerEvent2() {
   readingsPhoto[readIndexPhoto] = valPhoto; //Saving valPhoto into an array
   Blynk.virtualWrite(V20, valPhoto); //Labeled value Photoresistor
   Blynk.virtualWrite(V21, valPhoto); //Gauge value Photoresistor
-  Blynk.virtualWrite(V22, valPhoto); //Chart value Photoresistor
+  Blynk.virtualWrite(V22, valPhoto); //All Chart value Photoresistor
+  Blynk.virtualWrite(V27, valPhoto); //Chart value Photoresistor
   readIndexPhoto +=1;
   if(readIndexPhoto > 50) readIndexPhoto = 0; //Resetting readIndexPhto
   }
 }
 
 void myTimerEvent3() {
-  if( !testButton && onTilt){
+  if( !testButton && onTilt ){
   //Reading value of tiltsensor
   valTilt = digitalRead(pinTilt);
   if (valTilt == true) {
@@ -227,13 +233,14 @@ void myTimerEvent3() {
 
 void myTimerEvent4(){
   //Calculate the distace
-  if( !testButton && onDistance){
+  if( !testButton && onDistance ){
   valDistance = ultraSonic();
   valDistance = constrain(valDistance, 2, 400); //Constrain for min and max value
   readingsDistance[readIndexDistance] = valDistance; //Saving the Distance into an array
   Blynk.virtualWrite(V40, valDistance); //Labeled value Distance
   Blynk.virtualWrite(V41, valDistance); // Gauge value Distance
-  Blynk.virtualWrite(V42, valDistance); //Chart value Distance
+  Blynk.virtualWrite(V42, valDistance); //All Chart value Distance
+  Blynk.virtualWrite(V47, valDistance); //Chart value Distance
   readIndexDistance += 1;
   if (readIndexDistance > 50) readIndexDistance = 0; // Resetting readIndexDistance
   }
@@ -243,7 +250,7 @@ void myTimerEvent5() {
   //Function for calculating average temp, distance and photoRes
   //The system has to run for an amount of time before this function to run
   if( !testButton){
-  if ((millis() - startTime) >= averageTime) {
+  if ((millis() - startTime) >= averageTime ) {
     //Creating variables internally
     float totalTemp = 0;
     float totalDistance = 0;
@@ -296,7 +303,7 @@ void myTimerEvent5() {
 }
 
 void myTimerEvent6(){
-  if ((millis() - startTime) >= averageTime) {
+  if ((millis() - startTime) >= averageTime ) {
     if( !testButton){
       //Creating variables to find MIN and MAX values
       int lowTemp = 125;
@@ -341,32 +348,49 @@ void myTimerEvent7(){
   //When testing the servo, sensors do not read values
   //Testing does not work if theres an alarm active
   if ( alarmNumb == 0 && testButton == 1){
-    if( servoEndPos == 0){
-      myservo.write(servoPos);
-      servoPos += 1;
-      if ( servoPos == 180) servoEndPos = 1;
-    }
-     else if (servoEndPos == 1){
-      myservo.write(servoPos);
-      servoPos -= 1;
-      if (servoPos == 0) servoEndPos = 0;
-     }
+    servoMove();
   }
 }
 
 void myTimerEvent8(){
-  //Blinking LED if theres an alarm on the system
-  //And Changing buzzer tones
+  //Alarm timer function where the Alarm LED blinks, Buzzer tones, and makes servo go from end to end
   if ( alarmNumb != 0){
-    if (led3.getValue()){
-      led3.off();
-      ledcWriteTone(channel, 1000);
+    lastAlarm = alarmNumb; //Saves what the last alarm numb was
+    if ( (millis()-lastBlink) >= blinkTime){ //Timer for blink, tonechange and servoswipe
+      if (led3.getValue()){
+        led3.off();                     //Led off
+        ledcWriteTone(channel, 1000);   //Buzzer 1000Hz
+        myservo.write(servoResetVal);   //Servo end position
+        servoEndPos = 0;              
+        lastBlink = millis();
+      }
+      else{
+        led3.on();                      //Led on
+        ledcWriteTone(channel, 2000);   //Buzzer 2000Hz
+        myservo.write(servoAlarmVal);   //Servo end position
+        servoEndPos = 1;
+        lastBlink = millis();         
+      }
+    } 
+  }
+  //If theres been an alarm and is now reset the servo will go to one of the end position,
+  //depending on how many alarm theres been
+  else if ( lastAlarm != 0 && alarmNumb == 0){
+    alarmCount +=1;                 // Counts alarms
+    if ( alarmCount % 2 == 0){      // If theres an even number of alarms the servo will go to the right 
+      myservo.write(servoResetVal);
+      servoPos = servoResetVal;     // Storing the position of servo
+      servoEndPos = 0;              // Storing the end pos of servo
+      lastAlarm = alarmNumb;        // Indicating last alarm was "no Alarm"
     }
     else{
-      led3.on();
-      ledcWriteTone(channel, 2000);
+      myservo.write(servoAlarmVal); //If theres an odd number of alarms the servo will go to the left
+      servoPos = servoAlarmVal;     // Storing the position of servo
+      servoEndPos = 1;              //Storing the end pos of servo
+      lastAlarm = alarmNumb;        //Indicating last alarm was "no Alarm"
     }
   }
+  
   else{
     led3.off();
     ledcWriteTone(channel, 0);
@@ -563,7 +587,7 @@ void setup()
   timer.setInterval(10000L, myTimerEvent5);//Calculating average every 10sec
   timer.setInterval(30000L, myTimerEvent6);//Max & Min calue every 30 sec
   timer.setInterval(20L, myTimerEvent7); //Servo test every 20 ms
-  timer.setInterval(2050L, myTimerEvent8);//Alarm LED blink and buzzer tone change
+  timer.setInterval(10L, myTimerEvent8);//Alarm LED blink and buzzer tone change
   //Start time set
   startTime = millis();
 }
@@ -620,46 +644,48 @@ void alarmSwitch(int alarmNumb){
   
   switch( alarmNumb ){
     case 0:
-      servoReset();
-
+      //No Alarm
       break;
       //Temp and Photo alarm
     case 1:
       Serial.println("ALARM! To high Temp and to low Photo");
       terminal.println("ALARM! To high Temp and to low Photo");
       terminal.flush();
-      servoAlarm();
       break;
       //Temp and Distance alarm
     case 2:
       Serial.println("ALARM! To high Temp and to big Distance");
       terminal.println("ALARM! To high Temp and to big Distance");
-      servoAlarm();
       terminal.flush();
       break;
       //Distance and Photo alarm
     case 3:
       Serial.println("ALARM! To high Distance and to low Photo");
       terminal.println("ALARM! To high Distance and to low Photo");
-      servoAlarm();
       terminal.flush();
       break;
       //Tilt alarm
     case 4:
       Serial.println("ALARM! Door is open!");
       terminal.println("ALARM! Door is open!");
-      servoAlarm();
       terminal.flush();
       break;
   }
 }
 
 
-void servoAlarm(){
-  //Sets servo in alarm modus
-  myservo.write(servoAlarmVal);
-  servoEndPos = 1; //Signalising what end position servo is in
-  servoPos = servoAlarmVal;  
+int servoMove(){
+  //Makes servo move from side to side
+  if( servoEndPos == 0){
+      myservo.write(servoPos);
+      servoPos += 5;
+      if ( servoPos == 180) servoEndPos = 1;
+    }
+     else if (servoEndPos == 1){
+      myservo.write(servoPos);
+      servoPos -= 5;
+      if (servoPos == 0) servoEndPos = 0;
+     }
 }
 
 void servoReset(){
