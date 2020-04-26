@@ -11,6 +11,8 @@ Zumo32U4Motors motors;
 Zumo32U4LineSensors linesensor;
 Zumo32U4Buzzer buzzer;
 L3G gyro;
+Zumo32U4ProximitySensors proxSensors;
+
 
 
 //Creating int value for sensvaluer
@@ -29,6 +31,11 @@ bool lineSTD = false;
 int stepNum = 0;
 int coneNum = 0;
 bool runGyro = false;
+int lastDir = 0;
+unsigned long followTime = 10000;
+unsigned long startTime;
+bool followMe = true;
+String myString = "Follow";
 
 // --- Helper functions
 int32_t getAngle() {
@@ -47,6 +54,7 @@ void setup() {
   //Iniates the LCD and linesensors
   lcd.init();
   linesensor.initFiveSensors();
+  proxSensors.initThreeSensors();
   //Sends you to the start of the mnu
   updateMenu();
 }
@@ -127,16 +135,20 @@ void updateMenu() {
       lcd.clear();
       lcd.print(">Cone");
       lcd.gotoXY(0,1);
-      lcd.print("Back");
+      lcd.print("Show");
       break;
     case 14:
       lcd.clear();
-      lcd.print(">Back");
+      lcd.print(">Show");
       lcd.gotoXY(0,1);
-      lcd.print(" ");
+      lcd.print("Back");
       break;
     case 15:
-      menu = 14;
+      lcd.clear();
+      lcd.print(">Back");
+      break;
+    case 16:
+      menu = 15;
       break;
     case 19:
       menu = 20;
@@ -220,6 +232,9 @@ void executeAction() {
       break;
     case 14:
       action14();
+      break;
+    case 15:
+      action15();
       break;
     case 20:
       action20();
@@ -453,8 +468,121 @@ void coneDrive (){
   }
 }
 
-//This function sends you back to the main menu
 void action14(){
+  if ( account_balance >= 10){
+    account_balance -= 10;
+    bool show = true;
+    while(show){
+      if ( buttonB.isPressed()){
+        show = false;
+        break;
+      }
+      proxSensors.read();
+      int cent_left = proxSensors.countsFrontWithLeftLeds();
+      int cent_right = proxSensors.countsFrontWithRightLeds();
+    
+      if ( (millis()-startTime) >= followTime){
+        if( followMe){
+        followMe = false;
+        myString = "Turn";
+        }
+        else{
+          followMe = true;
+          myString = "Follow";
+        }
+        startTime = millis();   
+      }
+      
+      lcd.clear();
+      lcd.gotoXY(0,0);
+      lcd.print(myString);
+      lcd.gotoXY(0,1);
+      lcd.print(" ");
+      lcd.print(cent_left);
+      lcd.print(" ");
+      lcd.print(cent_right);
+      lcd.print(" ");
+    
+      if ( followMe) follower(cent_left, cent_right);
+      else if( !followMe ) turner(cent_left, cent_right); 
+    
+      delay(50);
+    }
+  } 
+  else{
+    lcd.clear();
+    lcd.print("To low");
+    lcd.gotoXY(0,1);
+    lcd.print("balance");
+    delay(2000);
+  }
+}
+
+void follower(int myCentLeft, int myCentRight){
+
+  if ( myCentLeft > myCentRight && lastDir != 1){
+    motors.setSpeeds(0,0);
+    delay(20);
+    motors.setSpeeds(50, 150);
+    lastDir = 1;
+  }
+  
+  else if ( myCentLeft > myCentRight){
+    motors.setSpeeds(50, 150);
+    lastDir = 1;
+  }
+  else if ( myCentRight > myCentLeft && lastDir != 2){
+    motors.setSpeeds(0,0);
+    delay(20);
+    motors.setSpeeds(150, 50);
+    lastDir = 2;
+  }
+  else if (myCentRight > myCentLeft){
+    motors.setSpeeds(150, 50);
+    lastDir = 2;
+  }
+  else if ( myCentRight == myCentLeft && lastDir != 0){
+    motors.setSpeeds(0,0);
+    delay(20);
+    motors.setSpeeds(100,100);
+    lastDir = 0;
+  }
+  else if ( myCentRight == myCentLeft){
+    motors.setSpeeds(100, 100);
+    lastDir = 0;
+  }
+}
+
+void turner(int myCentLeft, int myCentRight){
+  if ( myCentLeft > myCentRight && lastDir != 1){
+    motors.setSpeeds(0,0);
+    delay(20);
+    motors.setSpeeds(-150, 150);
+    lastDir = 1;
+  }
+  
+  else if ( myCentLeft > myCentRight){
+    motors.setSpeeds(-150, 150);
+    lastDir = 1;
+  }
+  else if ( myCentRight > myCentLeft && lastDir != 2){
+    motors.setSpeeds(0,0);
+    delay(20);
+    motors.setSpeeds(150, -150);
+    lastDir = 2;
+  }
+  else if (myCentRight > myCentLeft){
+    motors.setSpeeds(150, -150);
+    lastDir = 2;
+  }
+  else{
+    motors.setSpeeds(0,0);
+  }
+  
+}
+
+//This function sends you back to the main menu
+void action15(){
   lcd.clear();
   menu = 1;
 }
