@@ -15,12 +15,12 @@
  * If one of the criteria for the alarm goes , the program goes into ALARM modus.
  * 
  * When in ALARM modus: The ALARM led in BLYNK is blinking.
- *                      Servo motor turns all over to the right and stays in that position.
+ *                      Servo motor turns from end position to end position
  *                      The buzzer start buzzing at an annoying frequency.
  * 
- * To reset the alarm: The values that created the alarm has to go back to "Normal" and the RESET button in BLYNK has to pressed.
- * This sets the servomotor back into "normal" modus and goes all the way to the left.
- * If the RESET button is pressed before the values are back to "Normal" the servo goes all the way to the left but will return back to "Alarm" modus.
+ * To reset the alarm: The values that created the alarm has to go back to "Normal".
+ * This sets the servomotor back into "normal" modus and goes all the way to the right after the first alarm, 
+ * and all the way to left after the next alarm. This alternates after each alarm.
  * 
  * On the BLYNK app theres an "Test" button that test the servomotor by rotating from end to end while it's pressed.
  * This is going to simulate an safety vaulve to check if its stuck or not. 
@@ -292,7 +292,7 @@ void myTimerEvent5() {
     terminal.println(averageTemp);
     terminal.print("The average photoval is: ");
     terminal.println(averagePhoto);
-    terminal.print("The average distance is: ");
+    terminal.print("The avrg dist is: ");
     terminal.println(averageDistance);
     terminal.flush();
     Blynk.virtualWrite(V13, averageTemp); //Chart average value Temp
@@ -470,7 +470,17 @@ BLYNK_WRITE(V46){
 BLYNK_WRITE(V7) {
   //Resetting buzzer and LED alarms
   if( param.asInt()){
-    servoReset();
+    if ( servoEndPos == 1){
+      myservo.write(servoResetVal);   //If the servo last end pos was right it goes to the left
+      servoEndPos = 0;                //Stores that last end pos was left
+      servoPos = servoResetVal;       //Stores servo position
+    }
+    else{
+      myservo.write(servoAlarmVal);   //If the servo last en pos was left it goes to the right
+      servoEndPos = 1;                //Stores last end pos was right
+      servoPos = servoAlarmVal;       //Store servo position
+    }
+             
     Serial.println("Alarm reset");
   }
 }
@@ -674,7 +684,7 @@ void alarmSwitch(int alarmNumb){
 }
 
 
-int servoMove(){
+void servoMove(){
   //Makes servo move from side to side
   if( servoEndPos == 0){
       myservo.write(servoPos);
@@ -688,12 +698,6 @@ int servoMove(){
      }
 }
 
-void servoReset(){
-  //Sets servo back in "normal" condition
-  myservo.write(servoResetVal);
-  servoEndPos = 0; //Signalising what end position servo is in
-  servoPos = servoResetVal;
-}
 
 //Section of code for creating the local website
 
