@@ -77,7 +77,6 @@
  * V47 = Distance Live Value Chart
  * V99 = Test Button For ServoMotor
  * 
-
  * 
  */
 #define BLYNK_PRINT Serial
@@ -303,6 +302,8 @@ void myTimerEvent5() {
 }
 
 void myTimerEvent6(){
+  //Function for finding MIN and MAX values
+  //The system has to run for an amount of time before this function to run
   if ((millis() - startTime) >= averageTime ) {
     if( !testButton){
       //Creating variables to find MIN and MAX values
