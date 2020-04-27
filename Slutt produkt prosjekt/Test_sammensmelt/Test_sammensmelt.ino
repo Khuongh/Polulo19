@@ -347,6 +347,7 @@ void action11(){
     }
   }
   else{
+    //Insufficent funds, fill upp account
     lcd.clear();
     lcd.print("To low");
     lcd.gotoXY(0,1);
@@ -508,6 +509,13 @@ void action14(){
     
       delay(50);
     }
+    motors.setSpeeds(0,0);
+    lcd.clear();
+    lcd.gotoXY(0,0);
+    lcd.print("Back to");
+    lcd.gotoXY(0,1);
+    lcd.print("meny");
+    delay(1000);
   } 
   else{
     lcd.clear();
