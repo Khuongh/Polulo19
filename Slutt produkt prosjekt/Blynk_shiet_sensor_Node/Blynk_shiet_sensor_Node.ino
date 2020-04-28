@@ -1,4 +1,5 @@
-  /* In this code the microcontroller is going to communicate with BLYNK via Wifi
+  /* This code is made by Khuong Huynh
+ *  In this code the microcontroller is going to communicate with BLYNK via Wifi
  * The microcontroller starts by connecting to the BLYNK server and the local internett.
  * It then test the servomotor by going side to side and calibrate the photoresistor.
  * This program uses timer intervals to call different functiong that reads the sensorvalues.
@@ -24,6 +25,7 @@
  * 
  * On the BLYNK app theres an "Test" button that test the servomotor by rotating from end to end while it's pressed.
  * This is going to simulate an safety vaulve to check if its stuck or not. 
+ * Theres also an "Reset" button. This sends the servo to one of the end position. Also alternating after each press.
  * 
  * There's an terminal in the BLYNK app that informs you about the status as the microcontroller is running.
  * 
@@ -79,6 +81,7 @@
  * 
  * 
  */
+ //Importing libraries
 #define BLYNK_PRINT Serial
 #include <WiFi.h>
 #include <WebServer.h>
@@ -97,12 +100,10 @@ WidgetTerminal terminal(V9);
 Servo myservo;
 WebServer server(80);
 
-// You should get Auth Token in the Blynk App.
-// Go to the Project Settings (nut icon).
+//Auth code from BLYNK app
 char auth[] = "4c6Lu1mnZD0FbMNK-95dckX85k7OEhlB";
 
-// Your WiFi credentials.
-// Set password to "" for open networks.
+//Wifi credentials
 char ssid[] = "Khuongs10";
 char pass[] = "Kake1234";
 
@@ -391,7 +392,7 @@ void myTimerEvent8(){
       lastAlarm = alarmNumb;        //Indicating last alarm was "no Alarm"
     }
   }
-  
+  //If none of the criterias above, turns of led and buzzer
   else{
     led3.off();
     ledcWriteTone(channel, 0);
@@ -710,6 +711,7 @@ void handle_OnConnect() {
   String alarmText;
   if ( alarmNumb == 0) alarmText = "Normal";
   else{ alarmText = "Alarm";}
+  //Sends in sensor values to HTML creating function
   server.send(200, "text/html", SendHTML(Temperature,PhotoRes, Distance, alarmText)); 
 }
 
@@ -717,7 +719,7 @@ void handle_NotFound(){
   //If no connection you get an error page
   server.send(404, "text/plain", "Not found");
 }
-
+//HTML creator function
 String SendHTML(float Temperature,float PhotoRes, float Distance, String Text){
   String axl = "<!DOCTYPE html> <html>\n";
   axl +="<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, user-scalable=no\">\n";

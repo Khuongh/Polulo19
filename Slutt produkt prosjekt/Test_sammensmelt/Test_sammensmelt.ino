@@ -28,7 +28,7 @@ const unsigned char maxSpeed = 200;
 int tapeNum = 0;
 bool linePID = false;
 bool lineSTD = false;
-int stepNum = 0;
+int stepNumConeDrive = 0;
 int coneNum = 0;
 bool runGyro = false;
 int lastDir = 0;
@@ -387,7 +387,8 @@ void action12(){
   }
 }
 
-//This function sends you back to the main menu
+//Function for drive for cone driving
+//This function cost 10 "units", if you dont have enough in your account the LCD will let you know and you have to fill up your account first.
 void action13(){
   if ( account_balance >= 10){
     account_balance -= 10;
@@ -406,11 +407,11 @@ void action13(){
     lcd.print("to start");
     buttonB.waitForPress();
     runGyro = true;
-    stepNum = 0;
+    stepNumConeDrive = 0;
     while ( runGyro ){
-      turnSensorUpdate();
-      angle = getAngle();
-      coneDrive();
+      turnSensorUpdate(); //Updates sensor
+      angle = getAngle(); //Gets the angle value
+      coneDrive();        //Calling the actual cone driving function
       // Update the display
       lcd.gotoXY(0, 0);
       lcd.print(angle);
@@ -418,6 +419,7 @@ void action13(){
     }
   }
   else{
+    //Insufficent funds
     lcd.clear();
     lcd.print("To low");
     lcd.gotoXY(0,1);
@@ -425,10 +427,10 @@ void action13(){
     delay(2000);
   }
 }
-
+//Cone drive function for driving through 4 cones and ending straight
 void coneDrive (){
-  
-  while ( stepNum == 0){
+  //Starts by turning to the left to 55 degrees
+  while ( stepNumConeDrive == 0){
     motors.setSpeeds(-100, 100);
     turnSensorUpdate();
     angle = getAngle();
@@ -438,50 +440,50 @@ void coneDrive (){
     if (angle >= 55){
       motors.setSpeeds(0,0);
       delay(20);
-      stepNum = 1;
+      stepNumConeDrive = 1;
       break;
     }
   }
-
+//If it has driven past 3 cones it will know to stop when it has reached 0 degree
   if (coneNum >= 3){
     motors.setSpeeds(100,200);
     if ( angle >= 0){
       motors.setSpeeds(0,0);
-      stepNum = 0;
+      stepNumConeDrive = 0;
       coneNum = 0;
       runGyro = false;
     }
   }
-
-  else if (stepNum == 1){
+//Turning to the right
+  else if (stepNumConeDrive == 1){
     motors.setSpeeds(200, 100);
     if ( angle <= -55){
-      stepNum = 2;
+      stepNumConeDrive = 2;
       coneNum += 1;
 
     }
   }
-  else if (stepNum == 2){
+//Turning to the left
+  else if (stepNumConeDrive == 2){
     motors.setSpeeds(100,200);
     if (angle >= 55){
-      stepNum = 1;
+      stepNumConeDrive = 1;
     }
   }
 }
 
+//Function for our sensorshow. This segment of code will first follow you. After 10 seconds the Zumo will stop and start turning towards you, while standing at the same spot.
 void action14(){
   if ( account_balance >= 10){
     account_balance -= 10;
     bool show = true;
+    delay(1000);//Gives the user a second before the Zumo drives
     while(show){
-      if ( buttonB.isPressed()){
-        show = false;
-        break;
-      }
+      //Reads proxsensors
       proxSensors.read();
-      int cent_left = proxSensors.countsFrontWithLeftLeds();
-      int cent_right = proxSensors.countsFrontWithRightLeds();
-    
+      int cent_left = proxSensors.countsFrontWithLeftLeds(); //Stores cent left prox sensor
+      int cent_right = proxSensors.countsFrontWithRightLeds(); //Stores cent right prox sensor
+    //Every 10 second the Zumo changes mode from following to turning
       if ( (millis()-startTime) >= followTime){
         if( followMe){
         followMe = false;
@@ -491,9 +493,9 @@ void action14(){
           followMe = true;
           myString = "Follow";
         }
-        startTime = millis();   
+        startTime = millis();   //Resets the timer since last change
       }
-      
+      //Prints what "mode" the Zumo is in and the values from the sensors
       lcd.clear();
       lcd.gotoXY(0,0);
       lcd.print(myString);
@@ -503,12 +505,19 @@ void action14(){
       lcd.print(" ");
       lcd.print(cent_right);
       lcd.print(" ");
-    
-      if ( followMe) follower(cent_left, cent_right);
+      //Calls on function for following if in follow mode
+      if ( followMe) follower(cent_left, cent_right); 
+      //Calls on function for turning if not in follow mode
       else if( !followMe ) turner(cent_left, cent_right); 
-    
       delay(50);
+      //Goes out of sensorshow when the B button is pressed
+      if ( buttonB.isPressed()){
+        show = false;
+        break;
+      }
+      
     }
+    //Stops the Zumo and indicates that its going back to the menu
     motors.setSpeeds(0,0);
     lcd.clear();
     lcd.gotoXY(0,0);
@@ -517,6 +526,8 @@ void action14(){
     lcd.print("meny");
     delay(1000);
   } 
+
+  //Insufficent funds
   else{
     lcd.clear();
     lcd.print("To low");
@@ -525,36 +536,19 @@ void action14(){
     delay(2000);
   }
 }
-
+//Function for following
 void follower(int myCentLeft, int myCentRight){
-
-  if ( myCentLeft > myCentRight && lastDir != 1){
-    motors.setSpeeds(0,0);
-    delay(20);
+  //Turning left and indicating last direction is left
+  if ( myCentLeft > myCentRight){
     motors.setSpeeds(50, 150);
     lastDir = 1;
   }
-  
-  else if ( myCentLeft > myCentRight){
-    motors.setSpeeds(50, 150);
-    lastDir = 1;
-  }
-  else if ( myCentRight > myCentLeft && lastDir != 2){
-    motors.setSpeeds(0,0);
-    delay(20);
-    motors.setSpeeds(150, 50);
-    lastDir = 2;
-  }
+  //Turning right and indicating last direction is right
   else if (myCentRight > myCentLeft){
     motors.setSpeeds(150, 50);
     lastDir = 2;
   }
-  else if ( myCentRight == myCentLeft && lastDir != 0){
-    motors.setSpeeds(0,0);
-    delay(20);
-    motors.setSpeeds(100,100);
-    lastDir = 0;
-  }
+  //Driving straight and indicating last directiong is straight
   else if ( myCentRight == myCentLeft){
     motors.setSpeeds(100, 100);
     lastDir = 0;
@@ -562,29 +556,30 @@ void follower(int myCentLeft, int myCentRight){
 }
 
 void turner(int myCentLeft, int myCentRight){
-  if ( myCentLeft > myCentRight && lastDir != 1){
-    motors.setSpeeds(0,0);
-    delay(20);
+  //Rotating left and indicating last direction is left
+  if ( myCentLeft > myCentRight ){
+    //If the Zumo was rotating to the right it stops first before continueing rotating to the left
+    if ( lastDir == 2){
+       motors.setSpeeds(0,0);
+       delay(20);
+    }
     motors.setSpeeds(-150, 150);
-    lastDir = 1;
+    lastDir = 1; //Indicating rotating to left
   }
-  
-  else if ( myCentLeft > myCentRight){
-    motors.setSpeeds(-150, 150);
-    lastDir = 1;
-  }
-  else if ( myCentRight > myCentLeft && lastDir != 2){
-    motors.setSpeeds(0,0);
-    delay(20);
+  //Rotating right and indicating last direction is right
+  else if ( myCentRight > myCentLeft){
+    //If the Zumo was rotating to the left it stops first before continueing rotating to the right
+    if ( lastDir == 1){
+      motors.setSpeeds(0,0);
+       delay(20);
+    }
     motors.setSpeeds(150, -150);
-    lastDir = 2;
+    lastDir = 2; //Indicating rotating to right
   }
-  else if (myCentRight > myCentLeft){
-    motors.setSpeeds(150, -150);
-    lastDir = 2;
-  }
+
   else{
     motors.setSpeeds(0,0);
+    lastDir = 0; //Indicating stop
   }
   
 }
