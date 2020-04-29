@@ -486,7 +486,6 @@ void coneDrive (){
 void action14(){
   if ( account_balance >= 10){
     account_balance -= 10;
-    bool show = true;
     buzzer.playFrequency(440, 200, 15);
     delay(1000);//Gives the user a second before the Zumo drives
     buzzer.playNote(NOTE_A(4), 2000, 15);
@@ -495,6 +494,7 @@ void action14(){
     delay(1000);
     while(buzzer.isPlaying());
     buzzer.playFromProgramSpace(fugue);
+    startTime = millis();
     while(buzzer.isPlaying()){
       //Reads proxsensors
       proxSensors.read();
@@ -505,10 +505,14 @@ void action14(){
         if( followMe){
         followMe = false;
         myString = "Turn";
+        ledRed(1);
+        ledGreen(0);
         }
         else{
           followMe = true;
           myString = "Follow";
+          ledRed(0);
+          ledGreen(1);
         }
         startTime = millis();   //Resets the timer since last change
       }
@@ -526,16 +530,14 @@ void action14(){
       if ( followMe) follower(cent_left, cent_right); 
       //Calls on function for turning if not in follow mode
       else if( !followMe ) turner(cent_left, cent_right); 
-      delay(50);
-      //Goes out of sensorshow when the B button is pressed
-      if ( buttonB.isPressed()){
-        show = false;
-        break;
-      }
+      delay(100);
+
       
     }
     //Stops the Zumo and indicates that its going back to the menu
     motors.setSpeeds(0,0);
+    ledRed(0);
+    ledGreen(0);
     lcd.clear();
     lcd.gotoXY(0,0);
     lcd.print("Back to");
