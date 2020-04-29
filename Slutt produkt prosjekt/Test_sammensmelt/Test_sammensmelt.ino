@@ -477,8 +477,15 @@ void action14(){
   if ( account_balance >= 10){
     account_balance -= 10;
     bool show = true;
+    buzzer.playFrequency(440, 200, 15);
     delay(1000);//Gives the user a second before the Zumo drives
-    while(show){
+    buzzer.playNote(NOTE_A(4), 2000, 15);
+    delay(200);
+    buzzer.stopPlaying();
+    delay(1000);
+    while(buzzer.isPlaying());
+    buzzer.playFromProgramSpace(fugue);
+    while(buzzer.isPlaying()){
       //Reads proxsensors
       proxSensors.read();
       int cent_left = proxSensors.countsFrontWithLeftLeds(); //Stores cent left prox sensor
