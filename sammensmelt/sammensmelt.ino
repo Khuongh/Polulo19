@@ -13,7 +13,6 @@ Zumo32U4Buzzer buzzer;
 L3G gyro;
 Zumo32U4ProximitySensors proxSensors;
 
-//Song that the zumo will play under the sensor show.
 const char fugue[] PROGMEM =
   "! O5 L16 agafaea dac+adaea fa<aa<bac#a dac#adaea f"
   "O6 dcd<b-d<ad<g d<f+d<gd<ad<b- d<dd<ed<f+d<g d<f+d<gd<ad"
@@ -483,9 +482,7 @@ void coneDrive (){
   }
 }
 
-//Function for our sensorshow. This segment of code will first follow you.
-//After 10 seconds the Zumo will stop and start turning towards you, while standing at the same spot.
-//The zumo will stop the show when the song is finished.
+//Function for our sensorshow. This segment of code will first follow you. After 10 seconds the Zumo will stop and start turning towards you, while standing at the same spot.
 void action14(){
   if ( account_balance >= 10){
     account_balance -= 10;
@@ -496,9 +493,9 @@ void action14(){
     buzzer.stopPlaying();
     delay(1000);
     while(buzzer.isPlaying());
-    buzzer.playFromProgramSpace(fugue); //Plays sound program from 
+    buzzer.playFromProgramSpace(fugue);
     startTime = millis();
-    while(buzzer.isPlaying()){ //Sensorshow is on while the song is playing
+    while(buzzer.isPlaying()){
       //Reads proxsensors
       proxSensors.read();
       int cent_left = proxSensors.countsFrontWithLeftLeds(); //Stores cent left prox sensor
@@ -641,7 +638,7 @@ void action20(){
         }
       }
       //Prints linesensors value on lcd
-      lcd.gotoXY(0,0);
+      lcd.gotoXY(0,1);
       lcd.print(position);
       //Using function to choose motorpower
       direct(position, myTape, tapeNum);
@@ -679,8 +676,10 @@ void direct(int x, bool myTape, int Num ){
   else if ( myTape && Num == 1 ){
     motors.setSpeeds(0,0);// Stops the zumo
     delay(200);
-    motors.setSpeeds(100, -100);//Turns the zumo 180 degree
+    motors.setSpeeds(-100, 100);//Turns the zumo 180 degree
     delay(1450);
+    motors.setSpeeds(0, 0);
+    delay(20);
     motors.setSpeeds(100,100);//Drive back to the turn
     delay(1500);
     motors.setSpeeds(0,0);//Stops the zumo
@@ -766,8 +765,9 @@ void action21(){
       //Motor output
       motors.setSpeeds(leftSpeed, rightSpeed);
       //Prints linesensors on lcd
+      lcd.gotoXY(0,1);
       lcd.print(position);
-      lcd.gotoXY(0,0);
+      
   }
   //Stops the Zumo and sends it back to main menu
     motors.setSpeeds(0,0);
@@ -800,9 +800,9 @@ void blackTape(){
   else if ( tapeNum == 1){
     motors.setSpeeds(0,0);// Stops the zumo
     delay(200);
-    motors.setSpeeds(100, -100);//Turns the zumo 180 degree
+    motors.setSpeeds(-100, 100);//Turns the zumo 180 degree
     delay(1550);
-    motors.setSpeeds(0,0);//Stop the zumo
+    motors.setSpeeds(0, 0);
     delay(20);
     motors.setSpeeds(100,100);//Drive back to the turn
     delay(1500);
