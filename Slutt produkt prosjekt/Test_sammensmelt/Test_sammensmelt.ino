@@ -13,6 +13,7 @@ Zumo32U4Buzzer buzzer;
 L3G gyro;
 Zumo32U4ProximitySensors proxSensors;
 
+//Song that the zumo will play under the sensor show.
 const char fugue[] PROGMEM =
   "! O5 L16 agafaea dac+adaea fa<aa<bac#a dac#adaea f"
   "O6 dcd<b-d<ad<g d<f+d<gd<ad<b- d<dd<ed<f+d<g d<f+d<gd<ad"
@@ -482,7 +483,9 @@ void coneDrive (){
   }
 }
 
-//Function for our sensorshow. This segment of code will first follow you. After 10 seconds the Zumo will stop and start turning towards you, while standing at the same spot.
+//Function for our sensorshow. This segment of code will first follow you.
+//After 10 seconds the Zumo will stop and start turning towards you, while standing at the same spot.
+//The zumo will stop the show when the song is finished.
 void action14(){
   if ( account_balance >= 10){
     account_balance -= 10;
@@ -493,9 +496,9 @@ void action14(){
     buzzer.stopPlaying();
     delay(1000);
     while(buzzer.isPlaying());
-    buzzer.playFromProgramSpace(fugue);
+    buzzer.playFromProgramSpace(fugue); //Plays sound program from 
     startTime = millis();
-    while(buzzer.isPlaying()){
+    while(buzzer.isPlaying()){ //Sensorshow is on while the song is playing
       //Reads proxsensors
       proxSensors.read();
       int cent_left = proxSensors.countsFrontWithLeftLeds(); //Stores cent left prox sensor
@@ -640,8 +643,6 @@ void action20(){
       //Prints linesensors value on lcd
       lcd.gotoXY(0,0);
       lcd.print(position);
-      lcd.gotoXY(0,1);
-      lcd.print(tapeNum);
       //Using function to choose motorpower
       direct(position, myTape, tapeNum);
       delay(50);
@@ -765,7 +766,7 @@ void action21(){
       //Motor output
       motors.setSpeeds(leftSpeed, rightSpeed);
       //Prints linesensors on lcd
-      lcd.print(tapeNum);
+      lcd.print(position);
       lcd.gotoXY(0,0);
   }
   //Stops the Zumo and sends it back to main menu
