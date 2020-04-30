@@ -1,4 +1,9 @@
   /* This code is made by Khuong Huynh
+   *  
+   *  
+ * READ THIS TEXT BEFORE UPLOADING TO YOUR MICROCONTROLLER!!!
+ * 
+ * 
  *  In this code the microcontroller is going to communicate with BLYNK via Wifi
  * The microcontroller starts by connecting to the BLYNK server and the local internett.
  * It then test the servomotor by going side to side and calibrate the photoresistor.
@@ -363,7 +368,8 @@ void myTimerEvent8(){
         led3.off();                     //Led off
         ledcWriteTone(channel, 1000);   //Buzzer 1000Hz
         myservo.write(servoResetVal);   //Servo end position
-        servoEndPos = 0;              
+        servoEndPos = 0;  
+        servoPos = servoResetVal;       //Indicating servo position
         lastBlink = millis();
       }
       else{
@@ -371,6 +377,7 @@ void myTimerEvent8(){
         ledcWriteTone(channel, 2000);   //Buzzer 2000Hz
         myservo.write(servoAlarmVal);   //Servo end position
         servoEndPos = 1;
+        servoPos = servoAlarmVal;       //Indicating servo position
         lastBlink = millis();         
       }
     } 
