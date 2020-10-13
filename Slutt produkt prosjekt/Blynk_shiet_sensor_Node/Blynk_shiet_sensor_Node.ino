@@ -3,7 +3,7 @@
    *  
  * READ THIS TEXT BEFORE UPLOADING TO YOUR MICROCONTROLLER!!!
  * 
- * 
+ * kkkkk
  *  In this code the microcontroller is going to communicate with BLYNK via Wifi
  * The microcontroller starts by connecting to the BLYNK server and the local internett.
  * It then test the servomotor by going side to side and calibrate the photoresistor.
